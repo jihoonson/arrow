@@ -46,6 +46,8 @@ TEST(DefaultMemoryPool, OOM) {
   ASSERT_RAISES(OutOfMemory, pool->Allocate(to_alloc, &data));
 }
 
+#ifndef NDEBUG
+
 TEST(DefaultMemoryPoolDeathTest, FreeLargeMemory) {
   MemoryPool* pool = default_memory_pool();
 
@@ -55,5 +57,7 @@ TEST(DefaultMemoryPoolDeathTest, FreeLargeMemory) {
                ".*Check failed: \\(bytes_allocated_\\) >= \\(size\\)");
   pool->Free(data, 100);
 }
+
+#endif // NDEBUG
 
 }  // namespace arrow

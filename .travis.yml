@@ -67,6 +67,7 @@ matrix:
 
 before_install:
 - ulimit -c unlimited -S
+- free -m
 - export CPP_BUILD_DIR=$TRAVIS_BUILD_DIR/cpp-build
 - export ARROW_CPP_INSTALL=$TRAVIS_BUILD_DIR/cpp-install
 

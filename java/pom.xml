@@ -300,7 +300,6 @@
             <enableAssertions>true</enableAssertions>
             <forkCount>${forkCount}</forkCount>
             <reuseForks>true</reuseForks>
-            <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=152m</argLine>
             <systemPropertyVariables>
               <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
             </systemPropertyVariables>

@@ -63,7 +63,7 @@ public class TestValueVector {
   @Rule
   public final ExternalResource rule = new ExternalResource() {
     private final String systemValue = System.getProperty(BaseValueVector.MAX_ALLOCATION_SIZE_PROPERTY);
-    private final String testValue = Long.toString(32*1024*1024);
+    private final String testValue = Long.toString(1024*1024);
 
     @Override
     protected void before() throws Throwable {

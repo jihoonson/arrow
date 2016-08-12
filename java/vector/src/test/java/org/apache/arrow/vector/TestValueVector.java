@@ -17,29 +17,13 @@
  */
 package org.apache.arrow.vector;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.nio.charset.Charset;
-
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.complex.ListVector;
 import org.apache.arrow.vector.complex.MapVector;
 import org.apache.arrow.vector.complex.RepeatedListVector;
 import org.apache.arrow.vector.complex.RepeatedMapVector;
-import org.apache.arrow.vector.holders.BitHolder;
-import org.apache.arrow.vector.holders.IntHolder;
-import org.apache.arrow.vector.holders.NullableFloat4Holder;
-import org.apache.arrow.vector.holders.NullableUInt4Holder;
-import org.apache.arrow.vector.holders.NullableVar16CharHolder;
-import org.apache.arrow.vector.holders.NullableVarCharHolder;
-import org.apache.arrow.vector.holders.RepeatedFloat4Holder;
-import org.apache.arrow.vector.holders.RepeatedIntHolder;
-import org.apache.arrow.vector.holders.RepeatedVarBinaryHolder;
-import org.apache.arrow.vector.holders.UInt4Holder;
-import org.apache.arrow.vector.holders.VarCharHolder;
+import org.apache.arrow.vector.holders.*;
 import org.apache.arrow.vector.types.MaterializedField;
 import org.apache.arrow.vector.types.Types;
 import org.apache.arrow.vector.types.Types.MinorType;
@@ -47,40 +31,21 @@ import org.apache.arrow.vector.util.BasicTypeHelper;
 import org.apache.arrow.vector.util.OversizedAllocationException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExternalResource;
+
+import java.nio.charset.Charset;
+
+import static org.junit.Assert.*;
 
 
 public class TestValueVector {
-  //private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TestValueVector.class);
 
   private final static String EMPTY_SCHEMA_PATH = "";
 
+  private final static int ALLOCATION_SIZE = 1024 * 1024;
+
   private BufferAllocator allocator;
-
-  // Rule to adjust MAX_ALLOCATION_SIZE and restore it back after the tests
-  @Rule
-  public final ExternalResource rule = new ExternalResource() {
-    private final String systemValue = System.getProperty(BaseValueVector.MAX_ALLOCATION_SIZE_PROPERTY);
-    private final String testValue = Long.toString(1024*1024);
-
-    @Override
-    protected void before() throws Throwable {
-      System.setProperty(BaseValueVector.MAX_ALLOCATION_SIZE_PROPERTY, testValue);
-    }
-
-    @Override
-    protected void after() {
-      if (systemValue != null) {
-        System.setProperty(BaseValueVector.MAX_ALLOCATION_SIZE_PROPERTY, systemValue);
-      }
-      else {
-        System.clearProperty(BaseValueVector.MAX_ALLOCATION_SIZE_PROPERTY);
-      }
-    }
-  };
-
+  
   @Before
   public void init() {
     allocator = new RootAllocator(Long.MAX_VALUE);
@@ -101,7 +66,7 @@ public class TestValueVector {
     final MaterializedField field = MaterializedField.create(EMPTY_SCHEMA_PATH, UInt4Holder.TYPE);
     final UInt4Vector vector = new UInt4Vector(field, allocator);
     // edge case 1: buffer size = max value capacity
-    final int expectedValueCapacity = BaseValueVector.MAX_ALLOCATION_SIZE / 4;
+    final int expectedValueCapacity = ALLOCATION_SIZE / 4;
     try {
       vector.allocateNew(expectedValueCapacity);
       assertEquals(expectedValueCapacity, vector.getValueCapacity());
@@ -113,7 +78,7 @@ public class TestValueVector {
 
     // common case: value count < max value capacity
     try {
-      vector.allocateNew(BaseValueVector.MAX_ALLOCATION_SIZE / 8);
+      vector.allocateNew(ALLOCATION_SIZE / 8);
       vector.reAlloc(); // value allocation reaches to MAX_VALUE_ALLOCATION
       vector.reAlloc(); // this should throw an IOOB
     } finally {
@@ -157,7 +122,7 @@ public class TestValueVector {
     final MaterializedField field = MaterializedField.create(EMPTY_SCHEMA_PATH, UInt4Holder.TYPE);
     final VarCharVector vector = new VarCharVector(field, allocator);
     // edge case 1: value count = MAX_VALUE_ALLOCATION
-    final int expectedAllocationInBytes = BaseValueVector.MAX_ALLOCATION_SIZE;
+    final int expectedAllocationInBytes = ALLOCATION_SIZE;
     final int expectedOffsetSize = 10;
     try {
       vector.allocateNew(expectedAllocationInBytes, 10);
@@ -172,7 +137,7 @@ public class TestValueVector {
 
     // common: value count < MAX_VALUE_ALLOCATION
     try {
-      vector.allocateNew(BaseValueVector.MAX_ALLOCATION_SIZE / 2, 0);
+      vector.allocateNew(ALLOCATION_SIZE / 2, 0);
       vector.reAlloc(); // value allocation reaches to MAX_VALUE_ALLOCATION
       vector.reAlloc(); // this tests if it overflows
     } finally {

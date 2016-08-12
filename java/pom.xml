@@ -303,6 +303,7 @@
             <systemPropertyVariables>
               <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
             </systemPropertyVariables>
+            <argLine>-XX:MaxDirectMemorySize=1073741824 -Dio.netty.allocator.numDirectArenas=8</argLine>
           </configuration>
         </plugin>
         <plugin>
